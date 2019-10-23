@@ -104,6 +104,16 @@ module Enumerable
     arr
   end
 
+  def my_map2
+    arr = []
+    my_each do |i|
+      return to_enum unless block_given?
+
+      arr << proc.call(i) if block_given?
+    end
+    arr
+  end
+
   def my_inject
     memo = nil
     my_each do |i|
@@ -119,7 +129,14 @@ module Enumerable
     end
     memo
   end
+
+  def multiply_els
+    my_inject do |acc, e|
+      acc * e
+    end
+  end
 end
 
-array = [202, 4, 5, 6, 4, 3, 7]
-puts array.my_inject { |acc, e| acc - e }
+array = [2, 4, 5]
+proc_square = Proc.new {|e| e + e }
+puts array.my_map2(&proc_square) 
