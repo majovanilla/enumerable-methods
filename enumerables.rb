@@ -3,11 +3,11 @@
 module Enumerable
   def my_each
     i = 0
-    while i < length
+    while i < size
       return to_enum unless block_given?
 
       if block_given?
-        yield(self[i])
+        yield(self.to_a[i])
         i += 1
       end
     end
@@ -15,11 +15,11 @@ module Enumerable
 
   def my_each_with_index
     i = 0
-    while i < length
+    while i < size
       return to_enum unless block_given?
 
       if block_given?
-        yield(self[i], i)
+        yield(self.to_a[i], i)
         i += 1
       end
     end
@@ -37,32 +37,24 @@ module Enumerable
     arr
   end
 
+  # works with arrays
   def my_all?
     all = true
     my_each do |i|
-      if block_given?
-        unless yield(i)
-          all = false
-          break
-        end
-      else
-        all = false unless i
-      end
+      return all = false unless yield(i) && block_given?
+
+      all = false unless i
     end
     all
   end
 
+  # works with arrays
   def my_any?
     any = false
     my_each do |i|
-      if block_given?
-        if yield(i)
-          any = true
-          break
-        end
-      elsif i
-        any = true
-      end
+      return any = true if block_given? && yield(i)
+
+      any = true unless block_given? && i
     end
     any
   end
@@ -85,11 +77,9 @@ module Enumerable
   def my_count
     counter = 0
     my_each do |i|
-      if block_given? && yield(i)
-        counter += 1
-      elsif i
-        counter += 1
-      end
+      counter += 1 unless block_given? && i
+
+      counter += 1 if block_given? && yield(i)
     end
     counter
   end
@@ -99,17 +89,7 @@ module Enumerable
     my_each do |i|
       return to_enum unless block_given?
 
-      arr << yield(i) if block_given?
-    end
-    arr
-  end
-
-  def my_map2
-    arr = []
-    my_each do |i|
-      return to_enum unless block_given?
-
-      arr << proc.call(i) if block_given?
+      arr << yield(i) || arr << proc.call(i) if block_given?
     end
     arr
   end
@@ -136,7 +116,3 @@ module Enumerable
     end
   end
 end
-
-array = [2, 4, 5]
-proc_square = Proc.new {|e| e + e }
-puts array.my_map2(&proc_square) 
