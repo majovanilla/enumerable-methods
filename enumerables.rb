@@ -7,7 +7,7 @@ module Enumerable
       return to_enum unless block_given?
 
       if block_given?
-        yield(self.to_a[i])
+        yield(to_a[i])
         i += 1
       end
     end
@@ -19,7 +19,7 @@ module Enumerable
       return to_enum unless block_given?
 
       if block_given?
-        yield(self.to_a[i], i)
+        yield(to_a[i], i)
         i += 1
       end
     end
