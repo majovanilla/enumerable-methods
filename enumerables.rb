@@ -16,11 +16,11 @@ module Enumerable
   def my_each_with_index
     i = 0
     while i < size
-      return to_enum unless block_given?
-
       if block_given?
         yield(to_a[i], i)
         i += 1
+      else 
+        return to_enum
       end
     end
   end
@@ -38,48 +38,56 @@ module Enumerable
   end
 
   # works with arrays
-  def my_all?
-    all = true
+  def my_all?(input = nil)
     my_each do |i|
-      return all = false unless yield(i) && block_given?
+      return false if block_given? && !yield(i)
 
-      all = false unless i
-    end
-    all
-  end
-
-  # works with arrays
-  def my_any?
-    any = false
-    my_each do |i|
-      return any = true if block_given? && yield(i)
-
-      any = true unless block_given? && i
-    end
-    any
-  end
-
-  def my_none?
-    none = true
-    my_each do |i|
-      if block_given?
-        if yield(i)
-          none = false
-          break
-        end
-      elsif i
-        none = false
+      if !block_given? && input.nil?
+        return false unless i
+      elsif !block_given? && input
+        return false unless check_input(i, input)
       end
     end
-    none
+    true
   end
 
-  def my_count
+  # # works with arrays
+  def my_any?(input = nil)
+    my_each do |i|
+      return true if block_given? && yield(i)
+
+      if !block_given? && input.nil?
+        return true if i
+      elsif !block_given? && input
+        return true if check_input(i, input)
+      end
+    end
+    false
+  end
+
+  def my_none?(input = nil)
+    my_each do |i|
+      return false if block_given? && yield(i)
+
+      if !block_given? && input.nil?
+        return false if i
+      elsif !block_given? && input
+        return false if check_input(i, input)
+      end
+    end
+    true
+  end
+
+  def my_count(input = nil)
     counter = 0
     my_each do |i|
-      counter += 1 unless block_given? && i
-
-      counter += 1 if block_given? && yield(i)
+      if block_given?
+        counter += 1 if yield(i)
+      elsif i && input.nil?
+        counter += 1 unless block_given?
+      elsif check_input(i, input)
+        counter += 1 unless block_given?
+      end
     end
     counter
   end
@@ -94,8 +102,7 @@ module Enumerable
     arr
   end
 
-  def my_inject
-    memo = nil
+  def my_inject(memo = nil)
     my_each do |i|
       return to_enum unless block_given?
 
@@ -113,6 +120,16 @@ module Enumerable
   def multiply_els
     my_inject do |acc, e|
       acc * e
+    end
+  end
+
+  def check_input(item, input)
+    if input.class == Regexp
+      return true if item.to_s.match(input)
+    elsif input.class == Class
+      return true if item.instance_of? input
+    elsif input.class == String || input.class == Integer
+      return true if item == input
     end
   end
 end
