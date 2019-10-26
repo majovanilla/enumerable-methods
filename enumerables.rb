@@ -19,7 +19,7 @@ module Enumerable
       if block_given?
         yield(to_a[i], i)
         i += 1
-      else 
+      else
         return to_enum
       end
     end
@@ -44,7 +44,7 @@ module Enumerable
 
       if !block_given? && input.nil?
         return false unless i
-      elsif !block_given? && input
+      elsif input
         return false unless check_input(i, input)
       end
     end
@@ -102,16 +102,27 @@ module Enumerable
     arr
   end
 
-  def my_inject(memo = nil)
-    my_each do |i|
-      return to_enum unless block_given?
+  def my_inject(start = nil, symbol = nil)
+    memo = 0
+    unless block_given?
+      return to_enum if start.nil? && symbol.nil?
 
-      if block_given?
-        memo = if memo.nil?
-                 i
-               else
-                 yield(memo, i)
-               end
+      if start && symbol.nil?
+        my_each do |i|
+          memo = memo.send(start, i)
+        end
+      elsif start && symbol
+        memo = start
+        my_each do |i|
+          memo = memo.send(symbol, i)
+        end
+      end
+    end
+
+    if block_given?
+      memo = start if start
+      my_each do |i|
+        memo = yield(memo, i)
       end
     end
     memo
@@ -125,7 +136,7 @@ module Enumerable
 
   def check_input(item, input)
     if input.class == Regexp
-      return true if item.to_s.match(input)
+      return true if item.match(input)
     elsif input.class == Class
       return true if item.instance_of? input
     elsif input.class == String || input.class == Integer
