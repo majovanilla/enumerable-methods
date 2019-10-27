@@ -16,11 +16,11 @@ module Enumerable
   def my_each_with_index
     i = 0
     while i < size
-      if block_given?
+      return to_enum if block_given?
+
+      unless block_given?
         yield(to_a[i], i)
         i += 1
-      else
-        return to_enum
       end
     end
   end
