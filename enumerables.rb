@@ -1,27 +1,26 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ModuleLength,
 module Enumerable
+  # rubocop:disable Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity
   def my_each
     i = 0
-    while i < size
-      return to_enum unless block_given?
+    return to_enum unless block_given?
 
-      if block_given?
-        yield(to_a[i])
-        i += 1
-      end
+    while i < size
+      yield(to_a[i])
+      i += 1
     end
+    self
   end
 
   def my_each_with_index
     i = 0
-    while i < size
-      return to_enum unless block_given?
+    return to_enum unless block_given?
 
-      if block_given?
-        yield(to_a[i], i)
-        i += 1
-      end
+    while i < size
+      yield(to_a[i], i)
+      i += 1
     end
     self
   end
@@ -102,8 +101,18 @@ module Enumerable
   end
 
   def my_inject(start = nil, symbol = nil)
-    unless block_given?
-      return to_enum if start.nil? && symbol.nil?
+    if block_given?
+      memo = start if start
+      if start.nil?
+        memo = to_a[0]
+        to_a.shift
+        my_each do |i|
+          memo = yield(memo, i)
+        end
+      end
+
+    elsif !block_given?
+      return to_enum if start.nil?
 
       if start && symbol.nil?
         memo = self[0]
@@ -116,14 +125,6 @@ module Enumerable
         my_each do |i|
           memo = memo.send(symbol, i)
         end
-      end
-      memo
-    end
-
-    if block_given?
-      memo = start if start
-      my_each do |i|
-        memo = yield(memo, i)
       end
     end
     memo
@@ -145,3 +146,6 @@ module Enumerable
     end
   end
 end
+
+# rubocop:enable Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity
+# rubocop:enable Metrics/ModuleLength,
