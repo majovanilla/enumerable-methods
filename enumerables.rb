@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-# rubocop:disable Style/CaseEquality
 
 module Enumerable
   def my_each
@@ -17,13 +16,14 @@ module Enumerable
   def my_each_with_index
     i = 0
     while i < size
-      return to_enum if block_given?
+      return to_enum unless block_given?
 
-      unless block_given?
+      if block_given?
         yield(to_a[i], i)
         i += 1
       end
     end
+    self
   end
 
   def my_select
@@ -38,7 +38,6 @@ module Enumerable
     arr
   end
 
-  # works with arrays
   def my_all?(input = nil)
     my_each do |i|
       return false if block_given? && !yield(i)
@@ -52,7 +51,6 @@ module Enumerable
     true
   end
 
-  # # works with arrays
   def my_any?(input = nil)
     my_each do |i|
       return true if block_given? && yield(i)
@@ -104,11 +102,12 @@ module Enumerable
   end
 
   def my_inject(start = nil, symbol = nil)
-    memo = 0
     unless block_given?
       return to_enum if start.nil? && symbol.nil?
 
       if start && symbol.nil?
+        memo = self[0]
+        shift
         my_each do |i|
           memo = memo.send(start, i)
         end
@@ -118,6 +117,7 @@ module Enumerable
           memo = memo.send(symbol, i)
         end
       end
+      memo
     end
 
     if block_given?
