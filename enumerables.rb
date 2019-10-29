@@ -138,7 +138,7 @@ module Enumerable
 
   def check_input(item, input)
     if input.class == Regexp
-      return true if item.match(input)
+      return true if item.to_s.match(input)
     elsif input.class == Class
       return true if item.instance_of? input
     elsif input.class == String || input.class == Integer
