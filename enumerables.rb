@@ -117,9 +117,9 @@ module Enumerable
 
       if (start.is_a? Symbol) && symbol.nil?
         memo = new_array[0]
-        #new_array.shift
         my_each_with_index do |e, i|
-          next if i == 0
+          next if i.zero?
+
           memo = memo.send(start, e)
         end
       elsif start && symbol
@@ -131,32 +131,6 @@ module Enumerable
     end
     memo
   end
-
-  #   new_array = to_a
-  #   if start.nil?
-  #     start = new_array[0]
-  #     new_array.shift
-  #   end
-  #   memo = start
-  #   if symbol
-  #     my_each do |i|
-  #       memo = memo.send(symbol, i)
-  #     end
-  #   end
-  #   my_each do |i|
-  #     memo = memo.send(start, i)
-  #   end
-
-  #   if block_given?
-  #     my_each do |i|
-  #       memo = yield(memo, i)
-  #     end
-  #   end
-
-  #   return to_enum if start.nil? && !block_given?
-
-  #   memo
-  # end
 
   def multiply_els
     my_inject do |acc, e|
