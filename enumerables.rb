@@ -102,19 +102,26 @@ module Enumerable
 
   def my_inject(start = nil, symbol = nil)
     new_array = to_a
+    memo = start
     if block_given?
-      memo = start if start
-      if start.nil?
-        memo = new_array[0]
-        new_array.shift
+      if !(start.is_a? Symbol) && symbol.nil?
         my_each do |i|
           memo = yield(memo, i)
+        end
+      elsif (start.is_a? Symbol) && symbol.nil?
+        memo = new_array[0]
+        my_each_with_index do |e, i|
+          next if i.zero?
+
+          memo = yield(start, e)
+        end
+      elsif start && symbol
+        my_each do |i|
+          memo = memo.send(symbol, i)
         end
       end
 
     elsif !block_given?
-      return to_enum if start.nil?
-
       if (start.is_a? Symbol) && symbol.nil?
         memo = new_array[0]
         my_each_with_index do |e, i|
@@ -123,10 +130,10 @@ module Enumerable
           memo = memo.send(start, e)
         end
       elsif start && symbol
-        memo = start
         my_each do |i|
           memo = memo.send(symbol, i)
         end
+      elsif start.nil? throw 'No block given'
       end
     end
     memo
@@ -150,4 +157,4 @@ module Enumerable
 end
 
 # rubocop:enable Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity
-# rubocop:enable Metrics/ModuleLength,
+# rubocop:enable Metrics/ModuleLength
