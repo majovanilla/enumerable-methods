@@ -79,12 +79,12 @@ module Enumerable
   def my_count(input = nil)
     counter = 0
     my_each do |i|
-      if block_given?
+      if block_given? && input.nil?
         counter += 1 if yield(i)
       elsif i && input.nil?
-        counter += 1 unless block_given?
-      elsif check_input(i, input)
-        counter += 1 unless block_given?
+        counter += 1
+      elsif check_input(i, input) && input.is_a?(Integer)
+        counter += 1
       end
     end
     counter
@@ -103,37 +103,32 @@ module Enumerable
   def my_inject(start = nil, symbol = nil)
     new_array = to_a
     memo = start
-    if block_given?
-      if !(start.is_a? Symbol) && symbol.nil?
-        my_each do |i|
-          memo = yield(memo, i)
-        end
-      elsif (start.is_a? Symbol) && symbol.nil?
-        memo = new_array[0]
-        my_each_with_index do |e, i|
-          next if i.zero?
-
-          memo = yield(start, e)
-        end
-      elsif start && symbol
-        my_each do |i|
-          memo = memo.send(symbol, i)
-        end
+    if start && symbol
+      my_each do |i|
+        memo = memo.send(symbol, i)
       end
+    elsif (start.is_a? Symbol) && symbol.nil?
+      memo = new_array[0]
+      my_each_with_index do |e, i|
+        next if i.zero?
 
-    elsif !block_given?
-      if (start.is_a? Symbol) && symbol.nil?
-        memo = new_array[0]
-        my_each_with_index do |e, i|
-          next if i.zero?
+        memo = memo.send(start, e)
+      end
+    end
+    if block_given? && start.nil?
+      memo = new_array[0]
+      my_each_with_index do |e, i|
+        next if i.zero?
 
-          memo = memo.send(start, e)
-        end
-      elsif start && symbol
-        my_each do |i|
-          memo = memo.send(symbol, i)
-        end
-      elsif start.nil? throw 'No block given'
+        memo = yield(memo, e)
+      end
+    end
+
+    if block_given? && start && symbol.nil?
+      my_each_with_index do |e, i|
+        next if i.zero?
+
+        memo = yield(memo, e)
       end
     end
     memo
@@ -150,7 +145,7 @@ module Enumerable
       return true if item.to_s.match(input)
     elsif input.class == Class
       return true if item.instance_of? input
-    elsif input.class == String || input.class == Integer
+    elsif input.class == String || input.class == Integer || input.class == Symbol
       return true if item == input
     end
   end
