@@ -125,9 +125,7 @@ module Enumerable
     end
 
     if block_given? && start && symbol.nil?
-      my_each_with_index do |e, i|
-        next if i.zero?
-
+      my_each do |e|
         memo = yield(memo, e)
       end
     end
