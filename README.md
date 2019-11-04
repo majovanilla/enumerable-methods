@@ -29,7 +29,6 @@
 ## Table of Contents
 
 * [About the Project](#about-the-project)
-* [Built with](#built-with)
 * [Installation](#installation)
 * [Contact](#contact)
 * [Acknowledgements](#acknowledgements)
